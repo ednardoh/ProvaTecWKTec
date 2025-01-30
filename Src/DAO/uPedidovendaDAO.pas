@@ -67,8 +67,6 @@ begin
                      APedidovendaModel.CODCLIENTE,
                      APedidovendaModel.VALORTOTAL]);
 
-      vQry.Connection.Commit;
-
       Result := True;
       vQry.Connection.Commit;
     except
