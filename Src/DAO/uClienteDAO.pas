@@ -36,7 +36,6 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.ExecSQL('insert into clientes(codigo, nome, cidade, uf)     '+
                    '              Values(:codigo, :nome, :cidade, :uf) ',
                     [AClienteModel.Codigo,
@@ -44,13 +43,10 @@ begin
                      AClienteModel.Cidade,
                      AClienteModel.UF]);
 
-      vQry.Connection.Commit;
       Result := True;
     except
     on E: Exception do
       begin
-        messagedlg('Erro: ' + E.Message,mtError,[mbok],0);
-        vQry.Connection.Rollback;  //desfaz a transação
         Result := False;
       end;
     end;
@@ -66,7 +62,6 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.ExecSQL('delete from clientes where codigo=:codigo ',
                     [AClienteModel.Codigo]);
 
@@ -75,8 +70,6 @@ begin
     except
     on E: Exception do
       begin
-        messagedlg('Erro: ' + E.Message,mtError,[mbok],0);
-        vQry.Connection.Rollback;  //desfaz a transação
         Result := False;
       end;
     end;
@@ -92,7 +85,6 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.ExecSQL('update clientes set   '+
                    ' nome   =:nome,       '+
                    ' cidade =:cidade,     '+
@@ -108,8 +100,6 @@ begin
     except
     on E: Exception do
       begin
-        messagedlg('Erro: ' + E.Message,mtError,[mbok],0);
-        vQry.Connection.Rollback;  //desfaz a transação
         Result := False;
       end;
     end;

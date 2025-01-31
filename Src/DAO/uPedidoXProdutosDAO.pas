@@ -56,7 +56,6 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.ExecSQL('insert into pedido_produtos (id,                '+
                    '                             numpedido,         '+
                    '                             codigo_produto,    '+
@@ -78,11 +77,9 @@ begin
                      );
 
       Result := True;
-      vQry.Connection.Commit;
     except
       on E: Exception do
         begin
-          vQry.Connection.Rollback;  //desfaz a transação
           Result := False;
         end;
     end;
@@ -99,7 +96,6 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.ExecSQL('update pedido_produtos set quantidade    =:quantidade,    '+
                    '                           vlr_unitario  =:vlr_unitario,  '+
                    '                           vlr_total     =:vlr_total      '+
@@ -116,11 +112,9 @@ begin
                      ]
                     );
       Result := True;
-      vQry.Connection.Commit;
     except
       on E: Exception do
         begin
-          vQry.Connection.Rollback;  //desfaz a transação
           Result := False;
         end;
     end;
@@ -137,16 +131,13 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.ExecSQL('delete from pedido_produtos where numpedido=:numpedido  ',
                     [APedidoXProdutosModel.NUMPEDIDO]);
 
       Result := True;
-      vQry.Connection.Commit;
     except
       on E: Exception do
         begin
-          vQry.Connection.Rollback;  //desfaz a transação
           Result := False;
         end;
     end;

@@ -132,8 +132,6 @@ begin
                   [AProdutoModel.Codigo,
                    AProdutoModel.Descricao,
                    AProdutoModel.PRECOVENDA]);
-
-    vQry.Connection.Commit;
     Result := True;
   finally
     vQry.Free;
@@ -147,16 +145,13 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-    vQry.ExecSQL('delete from produtos where codigo=:codigo ', [AProdutoModel.Codigo]);
-
-    vQry.Connection.Commit;
-    Result := True;
-      except
-      on E: Exception do
-        begin
-          messagedlg('Erro: ' + E.Message,mtError,[mbok],0);
-          vQry.Connection.Rollback;  //desfaz a transação
-        end;
+      vQry.ExecSQL('delete from produtos where codigo=:codigo ', [AProdutoModel.Codigo]);
+      Result := True;
+    except
+    on E: Exception do
+      begin
+        Result := False;
+      end;
     end;
   finally
     vQry.Free;

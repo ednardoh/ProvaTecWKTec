@@ -853,11 +853,15 @@ object frmMov_PEDVendas: TfrmMov_PEDVendas
     Top = 319
   end
   object ds_ConsCliente: TDataSource
-    Left = 888
+    Left = 896
     Top = 415
   end
   object ds_ConsProduto: TDataSource
     Left = 920
     Top = 319
+  end
+  object QryAux: TFDQuery
+    Left = 1000
+    Top = 323
   end
 end

@@ -58,7 +58,6 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-      vQry.Connection.StartTransaction;
       vQry.Close;
       vQry.ExecSQL('insert into pedidos (numpedido, data_emissao, codigo_cliente, valor_total) '+
                    '       values (:numpedido, :data_emissao, :codigo_cliente, :valor_total)   ',
@@ -68,11 +67,9 @@ begin
                      APedidovendaModel.VALORTOTAL]);
 
       Result := True;
-      vQry.Connection.Commit;
     except
       on E: Exception do
         begin
-          vQry.Connection.Rollback;  //desfaz a transação
           Result := False;
         end;
     end;
@@ -90,7 +87,6 @@ begin
   try
     try
       strSQL :='';
-      vQry.Connection.StartTransaction;
       vQry.Close;
       vQry.SQL.Clear;
 
@@ -104,13 +100,10 @@ begin
       vQry.ParamByName('codigo_cliente').AsInteger := APedidovendaModel.CODCLIENTE;
       vQry.ParamByName('valor_total').AsFloat      := APedidovendaModel.VALORTOTAL;
       vQry.ParamByName('numpedido').AsInteger      := APedidovendaModel.NUMPEDIDO;
-
       vQry.ExecSQL();
-      vQry.Connection.Commit;
     except
       on E: Exception do
         begin
-          vQry.Connection.Rollback;  //desfaz a transação
           Result := False;
         end;
     end;
@@ -128,16 +121,13 @@ begin
   vQry := FConexao.CriarQuery();
   try
     try
-    vQry.Connection.StartTransaction;
     vQry.ExecSQL('delete from pedidos where numpedido =:numpedido',
                   [APedidovendaModel.NUMPEDIDO]);
 
-     vQry.Connection.Commit;
      Result := True;
     except
       on E: Exception do
         begin
-          vQry.Connection.Rollback;  //desfaz a transação
           Result := false;
         end;
     end;

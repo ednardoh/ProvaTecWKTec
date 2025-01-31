@@ -71,6 +71,7 @@ type
     QryPedprodutoValor_Total: TFloatField;
     Label19: TLabel;
     Label20: TLabel;
+    QryAux: TFDQuery;
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormShow(Sender: TObject);
     procedure FormKeyDown(Sender: TObject; var Key: Word; Shift: TShiftState);
@@ -630,77 +631,88 @@ begin
   if key = VK_F7 then
     begin
       try
-        PedidovendaCab := TPedidovendaControl.Create;
-        if Application.messageBox('Deseja Gravar o Pedido ?','Confirmação',mb_YesNo+mb_IconInformation+mb_DefButton2) = IdYes then
-          begin
-            if statusGravaPed <> 'dsEdit' then
+        try
+          PedidovendaCab := TPedidovendaControl.Create;
+          QryAux := PedidovendaCab.PedidovendaModel.Obter('-1');
+          if Application.messageBox('Deseja Gravar o Pedido ?','Confirmação',mb_YesNo+mb_IconInformation+mb_DefButton2) = IdYes then
             begin
-              //Grava o cabeçalho do pedido
-              PedidovendaCab.PedidovendaModel.Acao := uEnumerado.tacIncluir; //status de inclusão do pedido
-              PedidovendaCab.PedidovendaModel.NUMPEDIDO   := PedidovendaCab.PedidovendaModel.GetId;
-              EDT_Numpedido.Text := FormatFloat('000000',PedidovendaCab.PedidovendaModel.NUMPEDIDO);
-              PedidovendaCab.PedidovendaModel.DATAEMISSAO := EDT_DTEMISSAO.Date;
-              PedidovendaCab.PedidovendaModel.CODCLIENTE  := StrToInt(EDT_CodCliente.Text);
-              PedidovendaCab.PedidovendaModel.VALORTOTAL  := StrToFloat(FormataMonetario(EdtTotVenda.Text));
-              PedidovendaCab.PedidovendaModel.Salvar;
-              ProdutosPedido:= TPedidoXProdutosControl.Create;
-              //Grava os itens
-              QryPedproduto.First;
-              while not QryPedproduto.Eof do
-                begin
-                   ProdutosPedido.PedidoXProdutosModel.Acao          := uEnumerado.tacIncluir; //status de inclusão do pedido
-                   ProdutosPedido.PedidoXProdutosModel.ID            := ProdutosPedido.PedidoXProdutosModel.GetId;
-                   ProdutosPedido.PedidoXProdutosModel.NUMPEDIDO     := StrToInt(EDT_Numpedido.Text);
-                   ProdutosPedido.PedidoXProdutosModel.CODPRODUTO    := QryPedprodutoCodProduto.AsString;
-                   ProdutosPedido.PedidoXProdutosModel.QUANTIDADE    := QryPedprodutoQuantidade.Value;
-                   ProdutosPedido.PedidoXProdutosModel.VALORUNITARIO := QryPedprodutoValor_Unitario.Value;
-                   ProdutosPedido.PedidoXProdutosModel.VALORTOTAL    := QryPedprodutoValor_Total.AsFloat;
-                   ProdutosPedido.PedidoXProdutosModel.Salvar;
-                   QryPedproduto.Next;
-                end;
-            end
-            else
-            begin
-              //Grava o cabeçalho do pedido
-              PedidovendaCab := TPedidovendaControl.Create;
-              PedidovendaCab.PedidovendaModel.Acao := uEnumerado.tacAlterar; //status de inclusão do pedido
-              PedidovendaCab.PedidovendaModel.NUMPEDIDO   := StrToInt(EDT_Numpedido.Text);
-              PedidovendaCab.PedidovendaModel.DATAEMISSAO := EDT_DTEMISSAO.Date;
-              PedidovendaCab.PedidovendaModel.CODCLIENTE  := StrToInt(EDT_CodCliente.Text);
-              PedidovendaCab.PedidovendaModel.VALORTOTAL  := StrToFloat(FormataMonetario(EdtTotVenda.Text));
-              PedidovendaCab.PedidovendaModel.Salvar;
-              ProdutosPedido:= TPedidoXProdutosControl.Create;
+              if statusGravaPed <> 'dsEdit' then
+              begin
+                //Grava o cabeçalho do pedido
+                QryAux.Connection.StartTransaction;
+                PedidovendaCab.PedidovendaModel.Acao := uEnumerado.tacIncluir; //status de inclusão do pedido
+                PedidovendaCab.PedidovendaModel.NUMPEDIDO   := PedidovendaCab.PedidovendaModel.GetId;
+                EDT_Numpedido.Text := FormatFloat('000000',PedidovendaCab.PedidovendaModel.NUMPEDIDO);
+                PedidovendaCab.PedidovendaModel.DATAEMISSAO := EDT_DTEMISSAO.Date;
+                PedidovendaCab.PedidovendaModel.CODCLIENTE  := StrToInt(EDT_CodCliente.Text);
+                PedidovendaCab.PedidovendaModel.VALORTOTAL  := StrToFloat(FormataMonetario(EdtTotVenda.Text));
+                PedidovendaCab.PedidovendaModel.Salvar;
+                ProdutosPedido:= TPedidoXProdutosControl.Create;
+                //Grava os itens
+                QryPedproduto.First;
+                while not QryPedproduto.Eof do
+                  begin
+                     ProdutosPedido.PedidoXProdutosModel.Acao          := uEnumerado.tacIncluir; //status de inclusão do pedido
+                     ProdutosPedido.PedidoXProdutosModel.ID            := ProdutosPedido.PedidoXProdutosModel.GetId;
+                     ProdutosPedido.PedidoXProdutosModel.NUMPEDIDO     := StrToInt(EDT_Numpedido.Text);
+                     ProdutosPedido.PedidoXProdutosModel.CODPRODUTO    := QryPedprodutoCodProduto.AsString;
+                     ProdutosPedido.PedidoXProdutosModel.QUANTIDADE    := QryPedprodutoQuantidade.Value;
+                     ProdutosPedido.PedidoXProdutosModel.VALORUNITARIO := QryPedprodutoValor_Unitario.Value;
+                     ProdutosPedido.PedidoXProdutosModel.VALORTOTAL    := QryPedprodutoValor_Total.AsFloat;
+                     ProdutosPedido.PedidoXProdutosModel.Salvar;
+                     QryPedproduto.Next;
+                  end;
+              end
+              else
+              begin
+                //Grava o cabeçalho do pedido
+                PedidovendaCab := TPedidovendaControl.Create;
+                PedidovendaCab.PedidovendaModel.Acao := uEnumerado.tacAlterar; //status de inclusão do pedido
+                PedidovendaCab.PedidovendaModel.NUMPEDIDO   := StrToInt(EDT_Numpedido.Text);
+                PedidovendaCab.PedidovendaModel.DATAEMISSAO := EDT_DTEMISSAO.Date;
+                PedidovendaCab.PedidovendaModel.CODCLIENTE  := StrToInt(EDT_CodCliente.Text);
+                PedidovendaCab.PedidovendaModel.VALORTOTAL  := StrToFloat(FormataMonetario(EdtTotVenda.Text));
+                PedidovendaCab.PedidovendaModel.Salvar;
+                ProdutosPedido:= TPedidoXProdutosControl.Create;
 
-              //apaga os itens e grava de novo
-              ProdutosPedido.PedidoXProdutosModel.Acao := uEnumerado.tacExcluir;
-              ProdutosPedido.PedidoXProdutosModel.NUMPEDIDO := StrToInt(EDT_Numpedido.Text);
-              ProdutosPedido.PedidoXProdutosModel.Salvar;
-              //apaga os itens e grava de novo
+                //apaga os itens e grava de novo
+                ProdutosPedido.PedidoXProdutosModel.Acao := uEnumerado.tacExcluir;
+                ProdutosPedido.PedidoXProdutosModel.NUMPEDIDO := StrToInt(EDT_Numpedido.Text);
+                ProdutosPedido.PedidoXProdutosModel.Salvar;
+                //apaga os itens e grava de novo
 
-              //Grava os itens
-              QryPedproduto.First;
-              while not QryPedproduto.Eof do
-                begin
-                   ProdutosPedido.PedidoXProdutosModel.Acao          := uEnumerado.tacAlterar; //status de inclusão do pedido
-                   ProdutosPedido.PedidoXProdutosModel.ID            := ProdutosPedido.PedidoXProdutosModel.GetId;
-                   ProdutosPedido.PedidoXProdutosModel.NUMPEDIDO     := StrToInt(EDT_Numpedido.Text);
-                   ProdutosPedido.PedidoXProdutosModel.CODPRODUTO    := QryPedprodutoCodProduto.AsString;
-                   ProdutosPedido.PedidoXProdutosModel.QUANTIDADE    := QryPedprodutoQuantidade.Value;
-                   ProdutosPedido.PedidoXProdutosModel.VALORUNITARIO := QryPedprodutoValor_Unitario.Value;
-                   ProdutosPedido.PedidoXProdutosModel.VALORTOTAL    := QryPedprodutoValor_Total.AsFloat;
-                   ProdutosPedido.PedidoXProdutosModel.Salvar;
-                   QryPedproduto.Next;
-                end;
+                //Grava os itens
+                QryPedproduto.First;
+                while not QryPedproduto.Eof do
+                  begin
+                     ProdutosPedido.PedidoXProdutosModel.Acao          := uEnumerado.tacAlterar; //status de inclusão do pedido
+                     ProdutosPedido.PedidoXProdutosModel.ID            := ProdutosPedido.PedidoXProdutosModel.GetId;
+                     ProdutosPedido.PedidoXProdutosModel.NUMPEDIDO     := StrToInt(EDT_Numpedido.Text);
+                     ProdutosPedido.PedidoXProdutosModel.CODPRODUTO    := QryPedprodutoCodProduto.AsString;
+                     ProdutosPedido.PedidoXProdutosModel.QUANTIDADE    := QryPedprodutoQuantidade.Value;
+                     ProdutosPedido.PedidoXProdutosModel.VALORUNITARIO := QryPedprodutoValor_Unitario.Value;
+                     ProdutosPedido.PedidoXProdutosModel.VALORTOTAL    := QryPedprodutoValor_Total.AsFloat;
+                     ProdutosPedido.PedidoXProdutosModel.Salvar;
+                     QryPedproduto.Next;
+                  end;
+              end;
+              Showmessage('Seu pedido foi gravado com sucesso. O número do seu pedido é : '+EDT_Numpedido.Text);
+              QryAux.Connection.commit;
+              if Application.messageBox('Deseja Imprimir o Pedido agora ?','Confirmação',mb_YesNo+mb_IconInformation+mb_DefButton2) = IdYes then
+              begin
+                ImprimirPedido;
+              end;
+              strStatusPDV :='ABRIR PEDIDO';
+              MenssagemPDV('F3 - ABRIR PEDIDO.');
+              statusGravaPed := 'dsBrowse';
             end;
-            Showmessage('Seu pedido foi gravado com sucesso. O número do seu pedido é : '+EDT_Numpedido.Text);
-            if Application.messageBox('Deseja Imprimir o Pedido agora ?','Confirmação',mb_YesNo+mb_IconInformation+mb_DefButton2) = IdYes then
+        except
+          on E: Exception do
             begin
-              ImprimirPedido;
+              QryAux.Connection.Rollback;
+              Showmessage ('Ocorreu erro no banco de dados.' + E.Message);
             end;
-            strStatusPDV :='ABRIR PEDIDO';
-            MenssagemPDV('F3 - ABRIR PEDIDO.');
-            statusGravaPed := 'dsBrowse';
-          end;
+        end;
       finally
         PedidovendaCab.Free;
       end;
